@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: SNS Stack For Monitoring Alerts
+
+Parameters:
+
+  EmailAddress:
+    Type: String
+
+
+Resources:
+
+  MonitoringTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: Monitoring-Alerts
+
+
+  EmailSubscription:
+
+    Type: AWS::SNS::Subscription
+    Properties:
+
+      Protocol: email
+      Endpoint: !Ref EmailAddress
+      TopicArn: !Ref MonitoringTopic
+
+
+Outputs:
+
+  TopicArn: 
+
+    Value: !Ref MonitoringTopic

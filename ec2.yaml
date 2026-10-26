@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: EC2 Instance For Monitoring
+
+Parameters:
+
+  PublicSubnetId:
+    Type: String
+
+  SecurityGroupId:
+    Type: String
+
+  AmiId:
+    Type: String
+
+  InstanceName:
+    Type: String
+
+
+Resources:
+
+  MonitoringInstance:
+
+    Type: AWS::EC2::Instance
+    Properties:
+
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds:
+
+        - !Ref SecurityGroupId
+
+
+      Tags:
+        - Key: Name
+          Value: !Ref InstanceName
+
+
+Outputs:
+
+  InstanceId:
+    Value: !Ref MonitoringInstance
+
+

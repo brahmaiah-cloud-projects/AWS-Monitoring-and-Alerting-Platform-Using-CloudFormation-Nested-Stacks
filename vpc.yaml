@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: VPC Nested Stack For Monitoring
+
+Resources:
+
+  MonitoringVPC:
+
+    Type: AWS::EC2::VPC
+    Properties:
+
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      
+      Tags:
+        - Key: Name
+          Value: Monitoring-VPC
+
+
+  PublicSubnet:
+
+    Type: AWS::EC2::Subnet
+    Properties:
+
+      VpcId: !Ref MonitoringVPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: ap-south-2a
+
+      Tags:
+        - Key: Name
+          Value: Public-Subnet
+
+
+  InternetGateway:
+
+    Type: AWS::EC2::InternetGateway
+    Properties:
+
+      Tags:
+        - Key: Name
+          Value: Monitoring-IGW
+
+  IGWAttachment:
+
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+
+      VpcId: !Ref MonitoringVPC
+      InternetGatewayId: !Ref InternetGateway
+ 
+
+  PublicRouteTable:
+
+    Type: AWS::EC2::RouteTable
+    Properties:
+
+      VpcId: !Ref MonitoringVPC
+
+      Tags:
+        - Key: Name
+          Value: Public-RT
+
+  PublicDefaultRoute:
+
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+
+  PublicSubnetAssociation:
+
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  MonitoringSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+
+      GroupDescription: Security Group For Monitoring Server
+
+      VpcId: !Ref MonitoringVPC
+
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+      Tags:
+        - Key: Name
+          Value: Monitoring-SG
+
+
+
+Outputs:
+
+  VpcId:
+    Value: !Ref MonitoringVPC
+
+  PublicSubnetId:
+    Value: !Ref PublicSubnet
+
+  SecurityGroupId:
+    Value: !Ref MonitoringSecurityGroup
+
+    
